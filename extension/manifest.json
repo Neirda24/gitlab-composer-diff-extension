@@ -28,12 +28,13 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["wasm/*"],
+      "resources": ["modules/*"],
       "matches": ["*://*/*"]
     }
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "icons": {
     "16": "icons/icon16.png",
