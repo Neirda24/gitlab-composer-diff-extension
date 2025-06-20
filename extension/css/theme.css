@@ -1,0 +1,35 @@
+/* Theme variables for Composer Diff extension */
+
+:root {
+  /* Light mode (default) */
+  --gl-background-color: #fff;
+  --gl-text-color: #333;
+  --gl-border-color: #e5e5e5;
+  --gl-header-bg-color: #fafafa;
+  --gl-hover-bg-color: #f5f5f5;
+  --gl-added-color: #1aaa55;
+  --gl-removed-color: #db3b21;
+  --gl-updated-color: #1f75cb;
+  --gl-container-bg-color: #f8f8f8;
+  --gl-container-border-color: #e1e1e1;
+  --gl-title-color: #333;
+  --gl-subtitle-color: #666;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode */
+    --gl-background-color: #1f1e24;
+    --gl-text-color: #e5e5e5;
+    --gl-border-color: #4b4b4b;
+    --gl-header-bg-color: #2a2a2a;
+    --gl-hover-bg-color: #333;
+    --gl-added-color: #2da160;
+    --gl-removed-color: #e24329;
+    --gl-updated-color: #428fdc;
+    --gl-container-bg-color: #2a2a2a;
+    --gl-container-border-color: #4b4b4b;
+    --gl-title-color: #e5e5e5;
+    --gl-subtitle-color: #bfbfbf;
+  }
+}

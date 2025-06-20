@@ -23,12 +23,12 @@
     {
       "matches": ["*://*/*"],
       "js": ["content.js"],
-      "css": ["styles.css"]
+      "css": ["styles.css", "css/theme.css", "css/main.css", "css/table.css"]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["modules/*"],
+      "resources": ["modules/*", "css/*"],
       "matches": ["*://*/*"]
     }
   ],

@@ -1,0 +1,73 @@
+/* Main styles for Composer Diff extension */
+
+/* Container for the composer diff */
+.composer-diff-container {
+  margin: 15px 0;
+  padding: 15px;
+  background-color: var(--gl-container-bg-color);
+  border: 1px solid var(--gl-container-border-color);
+  border-radius: 3px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--gl-text-color);
+}
+
+/* Header for the diff container */
+.composer-diff-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Title for the diff */
+.composer-diff-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+  color: var(--gl-title-color);
+}
+
+/* Markdown content */
+.markdown-content {
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.markdown-content h2 {
+  font-size: 16px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--gl-border-color);
+  padding-bottom: 5px;
+  color: var(--gl-title-color);
+}
+
+.markdown-content h3 {
+  font-size: 14px;
+  margin-top: 15px;
+  margin-bottom: 8px;
+  color: var(--gl-title-color);
+}
+
+/* Error message */
+.composer-diff-error {
+  color: var(--gl-removed-color);
+  padding: 10px;
+  background-color: #ffebee; /* Light red background */
+  border-radius: 3px;
+  margin-top: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .composer-diff-error {
+    background-color: #4a0000; /* Dark red background */
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .composer-diff-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

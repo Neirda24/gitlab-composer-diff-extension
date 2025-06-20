@@ -128,24 +128,18 @@ function handleMessage(request, sender, sendResponse) {
     debugInfo.diffGenerated = diffGenerated;
 
     sendResponse(debugInfo);
+  } else if (request.action === 'setLogLevel') {
+    // Set the log level
+    if (request.logLevel !== undefined) {
+      logger.info(`Setting log level to: ${request.logLevel}`);
+      logger.setLogLevel(request.logLevel);
+      sendResponse({ success: true });
+    } else {
+      logger.error('No log level provided in setLogLevel message');
+      sendResponse({ success: false, error: 'No log level provided' });
+    }
   }
 }
-
-// Note: We no longer need these event listeners since we're explicitly calling initialize from content.js
-// But we'll keep them commented out for reference
-/*
-document.addEventListener('DOMContentLoaded', function() {
-  logger.info('DOMContentLoaded event fired');
-  // Wait a short time to ensure GitLab has finished rendering
-  setTimeout(initialize, 1000);
-});
-
-window.addEventListener('load', function() {
-  logger.info('Window load event fired');
-  // Wait a short time to ensure GitLab has finished rendering
-  setTimeout(initialize, 1000);
-});
-*/
 
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener(handleMessage);

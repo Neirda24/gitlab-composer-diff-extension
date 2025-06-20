@@ -1,0 +1,70 @@
+/* Table styles for Composer Diff extension */
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+  border: 1px solid var(--gl-border-color);
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.markdown-content thead {
+  background-color: var(--gl-header-bg-color);
+}
+
+.markdown-content th {
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--gl-title-color);
+  border-bottom: 1px solid var(--gl-border-color);
+}
+
+.markdown-content td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--gl-border-color);
+  color: var(--gl-text-color);
+}
+
+.markdown-content tr:last-child td {
+  border-bottom: none;
+}
+
+.markdown-content tr:hover {
+  background-color: var(--gl-hover-bg-color);
+}
+
+/* Package status styling */
+.package-added {
+  color: var(--gl-added-color);
+}
+
+.package-removed {
+  color: var(--gl-removed-color);
+}
+
+.package-updated {
+  color: var(--gl-updated-color);
+}
+
+/* Version and section changes */
+.version-from, .section-from {
+  text-decoration: line-through;
+  opacity: 0.7;
+  margin-right: 0.25rem;
+}
+
+.version-to, .section-to {
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .markdown-content table {
+    display: block;
+    overflow-x: auto;
+  }
+}

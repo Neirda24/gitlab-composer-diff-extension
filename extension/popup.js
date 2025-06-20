@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   const statusElement = document.getElementById('status');
+  const logLevelSelect = document.getElementById('logLevel');
+  const logLevelFeedback = document.getElementById('logLevelFeedback');
 
   // Debug info elements
   const isGitLabElement = document.getElementById('isGitLab');
@@ -8,6 +10,31 @@ document.addEventListener('DOMContentLoaded', function() {
   const sourceBranchElement = document.getElementById('sourceBranch');
   const targetBranchElement = document.getElementById('targetBranch');
   const hasComposerLockElement = document.getElementById('hasComposerLock');
+
+  // Log level names for display
+  const LOG_LEVEL_NAMES = {
+    '0': 'DEBUG',
+    '1': 'INFO',
+    '2': 'WARN',
+    '3': 'ERROR'
+  };
+
+  // Load saved log level
+  chrome.storage.sync.get('logLevel', function(data) {
+    if (data.logLevel !== undefined) {
+      const logLevel = data.logLevel;
+      logLevelSelect.value = logLevel;
+
+      // Show current log level briefly
+      const logLevelName = LOG_LEVEL_NAMES[logLevel];
+      logLevelFeedback.textContent = `Current log level: ${logLevelName}`;
+
+      // Clear feedback after 3 seconds
+      setTimeout(() => {
+        logLevelFeedback.textContent = '';
+      }, 3000);
+    }
+  });
 
   // Update debug information
   function updateDebugInfo() {
@@ -37,8 +64,8 @@ document.addEventListener('DOMContentLoaded', function() {
           sourceBranchElement.textContent = response.sourceBranch;
           targetBranchElement.textContent = response.targetBranch;
 
-          hasComposerLockElement.textContent = response.hasComposerLock ? 'Yes' : 'No';
-          hasComposerLockElement.className = response.hasComposerLock ? 'true' : 'false';
+          hasComposerLockElement.textContent = response.composerLockFound ? 'Yes' : 'No';
+          hasComposerLockElement.className = response.composerLockFound ? 'true' : 'false';
         }
       });
     });
@@ -73,6 +100,41 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
+
+  // Handle log level changes
+  logLevelSelect.addEventListener('change', function() {
+    const logLevel = parseInt(logLevelSelect.value);
+    const logLevelName = LOG_LEVEL_NAMES[logLevel];
+
+    // Save the log level to storage
+    chrome.storage.sync.set({ logLevel: logLevel });
+
+    // Update feedback
+    logLevelFeedback.textContent = `Log level set to ${logLevelName}`;
+
+    // Clear feedback after 3 seconds
+    setTimeout(() => {
+      logLevelFeedback.textContent = '';
+    }, 3000);
+
+    // Send the new log level to the content script
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      if (tabs.length === 0) return;
+
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: 'setLogLevel',
+        logLevel: logLevel
+      }, function(response) {
+        if (chrome.runtime.lastError) {
+          console.error('Error setting log level:', chrome.runtime.lastError);
+          logLevelFeedback.textContent = 'Error setting log level';
+          logLevelFeedback.style.color = '#F44336';
+        } else if (response && response.success) {
+          console.log('Log level set successfully');
+        }
+      });
+    });
+  });
 
   updateStatus();
   updateDebugInfo();
