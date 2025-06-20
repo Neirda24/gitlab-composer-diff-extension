@@ -1,0 +1,129 @@
+/* Styles for Composer Diff extension */
+
+/* Container for the composer diff */
+.composer-diff-container {
+  margin: 15px 0;
+  padding: 15px;
+  background-color: #f8f8f8;
+  border: 1px solid #e1e1e1;
+  border-radius: 3px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header for the diff container */
+.composer-diff-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Title for the diff */
+.composer-diff-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Copy button */
+.composer-diff-copy-button {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.composer-diff-copy-button:hover {
+  background-color: #45a049;
+}
+
+/* Markdown content */
+.markdown-content {
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.markdown-content h2 {
+  font-size: 20px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e1e1e1;
+  padding-bottom: 5px;
+}
+
+.markdown-content h3 {
+  font-size: 16px;
+  margin-top: 15px;
+  margin-bottom: 8px;
+}
+
+.markdown-content pre {
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-radius: 3px;
+  overflow-x: auto;
+}
+
+.markdown-content code {
+  font-family: Consolas, Monaco, 'Andale Mono', monospace;
+  font-size: 13px;
+}
+
+.markdown-content strong {
+  font-weight: bold;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+/* Loading indicator */
+.composer-diff-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.composer-diff-loading::after {
+  content: "Loading diff...";
+  margin-left: 10px;
+}
+
+/* Error message */
+.composer-diff-error {
+  color: #d32f2f;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 3px;
+  margin-top: 10px;
+}
+
+/* Package changes */
+.package-added {
+  color: #4CAF50;
+}
+
+.package-removed {
+  color: #F44336;
+}
+
+.package-updated {
+  color: #2196F3;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .composer-diff-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .composer-diff-copy-button {
+    margin-top: 10px;
+  }
+}

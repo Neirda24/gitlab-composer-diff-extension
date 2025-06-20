@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Composer Diff for GitLab</title>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 350px;
+      padding: 10px;
+    }
+    h1 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-size: 14px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      border-top: 1px solid #e1e1e1;
+      padding-top: 10px;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 5px;
+      border-radius: 3px;
+      background-color: #f8f8f8;
+    }
+    button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .settings {
+      margin-top: 15px;
+    }
+    .debug-section {
+      margin-top: 15px;
+    }
+    .debug-info {
+      font-size: 12px;
+      line-height: 1.5;
+      background-color: #f8f8f8;
+      padding: 8px;
+      border-radius: 3px;
+    }
+    .debug-info div {
+      margin-bottom: 5px;
+    }
+    .true {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .false {
+      color: #F44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>Composer Diff for GitLab</h1>
+  <div class="status" id="status">
+    Looking for composer.lock files in the current merge request...
+  </div>
+  <div class="settings">
+    <label>
+      <input type="checkbox" id="autoRun" checked>
+      Automatically show diff when composer.lock is detected
+    </label>
+  </div>
+  <div class="button-group" style="display: flex; gap: 10px; margin-top: 10px;">
+    <button id="refreshButton">Refresh Diff</button>
+    <button id="copyMarkdownButton" style="background-color: #2196F3;">Copy as Markdown</button>
+  </div>
+
+  <div class="debug-section">
+    <h2>Debug Information</h2>
+    <div class="debug-info" id="debugInfo">
+      <div><strong>GitLab Instance:</strong> <span id="isGitLab">Checking...</span></div>
+      <div><strong>Self-Hosted:</strong> <span id="isSelfHosted">Checking...</span></div>
+      <div><strong>On Merge Request:</strong> <span id="isMergeRequest">Checking...</span></div>
+      <div><strong>Source Branch:</strong> <span id="sourceBranch">Checking...</span></div>
+      <div><strong>Target Branch:</strong> <span id="targetBranch">Checking...</span></div>
+      <div><strong>Composer.lock in Diff:</strong> <span id="hasComposerLock">Checking...</span></div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

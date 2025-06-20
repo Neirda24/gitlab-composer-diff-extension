@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#FF9500" />
+
+  <!-- Simplified Fox -->
+  <g id="fox">
+    <!-- Fox head -->
+    <path d="M256 120 L356 220 L356 320 L256 400 L156 320 L156 220 Z" fill="#FF5722" />
+
+    <!-- Fox ears -->
+    <path d="M256 120 L306 170 L286 210 Z" fill="#FFFFFF" />
+    <path d="M256 120 L206 170 L226 210 Z" fill="#FFFFFF" />
+
+    <!-- Fox face -->
+    <circle cx="226" cy="260" r="15" fill="#FFFFFF" />
+    <circle cx="286" cy="260" r="15" fill="#FFFFFF" />
+    <circle cx="226" cy="260" r="7" fill="#000000" />
+    <circle cx="286" cy="260" r="7" fill="#000000" />
+
+    <!-- Fox nose -->
+    <path d="M256 280 L276 300 L256 320 L236 300 Z" fill="#FFFFFF" />
+  </g>
+
+  <!-- Pull Request Icon (simplified) -->
+  <g id="pull-request" transform="translate(256, 256) scale(0.5) translate(-256, -256)">
+    <!-- Circle at top -->
+    <circle cx="256" cy="128" r="40" fill="#FFFFFF" stroke="#000000" stroke-width="8" />
+
+    <!-- Circle at bottom right -->
+    <circle cx="356" cy="356" r="40" fill="#FFFFFF" stroke="#000000" stroke-width="8" />
+
+    <!-- Lines connecting circles -->
+    <path d="M256 168 L256 256 L356 316" fill="none" stroke="#000000" stroke-width="12" stroke-linecap="round" />
+  </g>
+</svg>
