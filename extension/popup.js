@@ -1,8 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
   const statusElement = document.getElementById('status');
-  const autoRunCheckbox = document.getElementById('autoRun');
-  const refreshButton = document.getElementById('refreshButton');
-  const copyMarkdownButton = document.getElementById('copyMarkdownButton');
 
   // Debug info elements
   const isGitLabElement = document.getElementById('isGitLab');
@@ -11,18 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const sourceBranchElement = document.getElementById('sourceBranch');
   const targetBranchElement = document.getElementById('targetBranch');
   const hasComposerLockElement = document.getElementById('hasComposerLock');
-
-  // Load saved settings
-  chrome.storage.sync.get(['autoRun'], function(result) {
-    if (result.autoRun !== undefined) {
-      autoRunCheckbox.checked = result.autoRun;
-    }
-  });
-
-  // Save settings when changed
-  autoRunCheckbox.addEventListener('change', function() {
-    chrome.storage.sync.set({ autoRun: autoRunCheckbox.checked });
-  });
 
   // Update debug information
   function updateDebugInfo() {
@@ -89,64 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Refresh button click handler
-  refreshButton.addEventListener('click', function() {
-    statusElement.textContent = 'Refreshing...';
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      if (tabs.length === 0) return;
-
-      chrome.tabs.sendMessage(tabs[0].id, { action: 'refreshDiff' }, function(response) {
-        if (chrome.runtime.lastError) {
-          statusElement.textContent = 'Error communicating with the page. Please refresh and try again.';
-          return;
-        }
-
-        if (response && response.success) {
-          statusElement.textContent = 'Diff refreshed successfully!';
-        } else {
-          statusElement.textContent = 'Failed to refresh diff. ' + (response ? response.message : '');
-        }
-      });
-    });
-  });
-
-  // Copy as Markdown button click handler
-  copyMarkdownButton.addEventListener('click', function() {
-    statusElement.textContent = 'Getting markdown diff...';
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      if (tabs.length === 0) return;
-
-      chrome.tabs.sendMessage(tabs[0].id, { action: 'getMarkdownDiff' }, function(response) {
-        if (chrome.runtime.lastError) {
-          statusElement.textContent = 'Error communicating with the page. Please refresh and try again.';
-          return;
-        }
-
-        if (response && response.markdown) {
-          // Copy the markdown to the clipboard
-          navigator.clipboard.writeText(response.markdown)
-            .then(() => {
-              statusElement.textContent = 'Markdown copied to clipboard!';
-              setTimeout(() => {
-                statusElement.textContent = 'Found composer.lock in the merge request!';
-              }, 2000);
-            })
-            .catch(err => {
-              console.error('Failed to copy text: ', err);
-              statusElement.textContent = 'Failed to copy to clipboard: ' + err.message;
-            });
-        } else {
-          statusElement.textContent = 'Failed to get markdown diff. ' + (response ? response.message : '');
-        }
-      });
-    });
-  });
-
-
-  console.log(chrome);
-  // Update status and debug info when popup opens
   updateStatus();
   updateDebugInfo();
 });

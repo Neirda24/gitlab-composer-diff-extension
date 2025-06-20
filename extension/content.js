@@ -239,14 +239,17 @@ function getDebugInfo() {
 /**
  * @param {function} callback
  * @param {number|null} [timeout=null]
+ * @param {boolean} [keepObserving=false]
  * @returns {MutationObserver}
  */
-function watch(callback, timeout = null) {
+function watch(callback, timeout = null, keepObserving = false) {
   // Créer l'observateur
   const observer = new MutationObserver((mutations, obs) => {
       try {
         callback();
-        obs.disconnect();
+        if (!keepObserving) {
+          obs.disconnect();
+        }
       } catch (error) {
         console.error('Error in callback:', error);
       }
@@ -279,7 +282,26 @@ async function generateDiff() {
 
     const htmlDiff = await generateComposerDiff(oldContent, newContent);
 
-    watch(() => insertDiffIntoPage(htmlDiff));
+    // Insert the diff into the page initially
+    insertDiffIntoPage(htmlDiff);
+
+    // Only add the scroll event listener once
+    if (!window.composerDiffScrollListenerAdded) {
+      window.composerDiffScrollListenerAdded = true;
+
+      window.addEventListener('scroll', function() {
+        // Use a debounce to avoid too many checks
+        if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+        this.scrollTimeout = setTimeout(function() {
+          // Check if the diff is still in the DOM
+          const existingDiff = document.querySelector('.composer-diff-container');
+          if (!existingDiff && composerLockFound && diffGenerated) {
+            console.log('Diff disappeared after scroll, re-inserting...');
+            insertDiffIntoPage(htmlDiff);
+          }
+        }, 200);
+      });
+    }
 
     return true;
   } catch (error) {
@@ -470,7 +492,7 @@ async function generateComposerDiff(oldContent, newContent) {
                 <tbody>
                     ${Object.keys(addedDiffList).map(packageName => {
                       const diff = addedDiffList[packageName];
-                
+
                       return `
                         <tr>
                             <td>${diff.name}</td>
@@ -498,13 +520,13 @@ async function generateComposerDiff(oldContent, newContent) {
                 <tbody>
                     ${Object.keys(updatedDiffList).map(packageName => {
                       const diff = updatedDiffList[packageName];
-              
+
                       const versionChanged = diff.previousVersion !== diff.newVersion;
                       const version = versionChanged ? `From ${diff.previousVersion} to ${diff.newVersion}` : diff.newVersion;
-              
+
                       const sectionChanged = diff.previousSection !== diff.newSection;
                       const section = sectionChanged ? `From ${diff.previousSection} to ${diff.newSection}` : diff.newSection;
-              
+
                       return `
                           <tr>
                               <td>${diff.name}</td>
@@ -532,7 +554,7 @@ async function generateComposerDiff(oldContent, newContent) {
                 <tbody>
                     ${Object.keys(removedDiffList).map(packageName => {
                       const diff = removedDiffList[packageName];
-              
+
                       return `
                           <tr>
                               <td>${diff.name}</td>
@@ -558,7 +580,7 @@ async function generateComposerDiff(oldContent, newContent) {
 function insertDiffIntoPage(htmlContent) {
   console.log('Inserting diff into page...');
 
-  // Find the composer.lock file in the diff using the same selectors as in checkForComposerLock
+  // Find the composer.lock file in the diff using various selectors
   const selectors = [
     '.file-title-name',                // Original selector
     '.file-header-content .file-title-name', // Another possible selector
@@ -566,7 +588,12 @@ function insertDiffIntoPage(htmlContent) {
     '.diff-file .file-title',          // Another possible selector
     '.diff-file .file-header-content', // Another possible selector
     '.js-file-title',                  // Another possible selector
-    '.file-header .file-title-name'    // Another possible selector
+    '.file-header .file-title-name',   // Another possible selector
+    '.file-title',                     // More generic selector
+    '[data-path*="composer.lock"]',    // Data attribute selector
+    '[title*="composer.lock"]',        // Title attribute selector
+    '.diff-file-header',               // Generic diff file header
+    '.diff-file'                       // Generic diff file
   ];
 
   let fileElements = [];
@@ -578,20 +605,44 @@ function insertDiffIntoPage(htmlContent) {
     console.log(`Selector "${selector}" found ${elements.length} elements for insertion`);
 
     if (elements.length > 0) {
-      fileElements = elements;
+      fileElements = Array.from(elements);
+
+      // Log the text content of each element for debugging
+      fileElements.forEach((el, index) => {
+        console.log(`Element ${index} text content:`, el.textContent.trim());
+        console.log(`Element ${index} has composer.lock:`, el.textContent.trim().includes('composer.lock'));
+
+        // Also check data attributes
+        if (el.dataset && el.dataset.path) {
+          console.log(`Element ${index} data-path:`, el.dataset.path);
+        }
+        if (el.getAttribute('title')) {
+          console.log(`Element ${index} title:`, el.getAttribute('title'));
+        }
+      });
+
       break;
     }
   }
 
   // Check each element for composer.lock
   for (const element of fileElements) {
-    if (element.textContent.trim().includes('composer.lock')) {
+    // Check text content, data-path, and title attributes
+    if (element.textContent.trim().includes('composer.lock') ||
+        (element.dataset && element.dataset.path && element.dataset.path.includes('composer.lock')) ||
+        (element.getAttribute('title') && element.getAttribute('title').includes('composer.lock'))) {
+
+      console.log('Found element with composer.lock reference:', element);
+
       // Try different parent selectors to find the diff file container
       const parentSelectors = [
         '.diff-file',
         '.file',
         '.diff-file-holder',
-        '.js-file-holder'
+        '.js-file-holder',
+        '.file-holder',
+        '.diff-content',
+        '.diff-wrap'
       ];
 
       for (const parentSelector of parentSelectors) {
@@ -607,9 +658,66 @@ function insertDiffIntoPage(htmlContent) {
     }
   }
 
+  // If we still couldn't find the composer.lock element, try a more aggressive approach
   if (!composerLockElement) {
-    console.error('Could not find composer.lock element in the page for insertion.');
-    throw new Error('Could not find composer.lock element in the page.');
+    console.log('Could not find composer.lock element using standard selectors, trying alternative approach');
+
+    // Try to find any element that contains "composer.lock" anywhere in its text
+    const allElements = document.querySelectorAll('*');
+    for (const element of allElements) {
+      if (element.textContent && element.textContent.includes('composer.lock')) {
+        console.log('Found element with composer.lock text:', element);
+
+        // Try to find a suitable parent container
+        const parent = element.closest('.diff-file') ||
+                      element.closest('.file') ||
+                      element.closest('.diff-file-holder') ||
+                      element.closest('.js-file-holder') ||
+                      element.closest('.file-holder') ||
+                      element.closest('.diff-content') ||
+                      element.closest('.diff-wrap');
+
+        if (parent) {
+          composerLockElement = parent;
+          console.log('Found composer.lock parent element using alternative approach:', parent);
+          break;
+        }
+      }
+    }
+  }
+
+  // If we still couldn't find it, try to find the first diff file as a fallback
+  if (!composerLockElement) {
+    console.log('Still could not find composer.lock element, trying to use first diff file as fallback');
+
+    const firstDiffFile = document.querySelector('.diff-file') ||
+                         document.querySelector('.file') ||
+                         document.querySelector('.diff-file-holder') ||
+                         document.querySelector('.js-file-holder');
+
+    if (firstDiffFile) {
+      composerLockElement = firstDiffFile;
+      console.log('Using first diff file as fallback:', firstDiffFile);
+    }
+  }
+
+  if (!composerLockElement) {
+    console.error('Could not find any suitable element in the page for insertion.');
+
+    // As a last resort, try to insert at the top of the diffs container
+    const diffsContainer = document.querySelector('.diffs') ||
+                          document.querySelector('.diff-files-holder') ||
+                          document.querySelector('#diffs') ||
+                          document.querySelector('.content-wrapper');
+
+    if (diffsContainer) {
+      composerLockElement = diffsContainer;
+      console.log('Using diffs container as last resort:', diffsContainer);
+    } else {
+      // If all else fails, just use the body
+      composerLockElement = document.body;
+      console.log('Using document body as final fallback');
+    }
   }
 
   // Check if we already added our diff
@@ -658,17 +766,28 @@ function insertDiffIntoPage(htmlContent) {
     '.file-content',
     '.diff-file-content',
     '.js-file-content',
-    '.file-holder'
+    '.file-holder',
+    '.diff-table',
+    '.content-wrapper',
+    '.diff-wrap-lines',
+    '.diff-wrap'
   ];
 
   let fileContent = null;
 
-  for (const selector of contentSelectors) {
-    const element = composerLockElement.querySelector(selector);
-    if (element) {
-      console.log(`Found diff content element with selector "${selector}"`);
-      fileContent = element;
-      break;
+  // Only try to find a child element if composerLockElement is not the body
+  if (composerLockElement !== document.body) {
+    for (const selector of contentSelectors) {
+      try {
+        const element = composerLockElement.querySelector(selector);
+        if (element) {
+          console.log(`Found diff content element with selector "${selector}"`);
+          fileContent = element;
+          break;
+        }
+      } catch (error) {
+        console.error(`Error finding element with selector "${selector}":`, error);
+      }
     }
   }
 
@@ -680,6 +799,31 @@ function insertDiffIntoPage(htmlContent) {
 
   // Insert the container at the beginning of the content
   console.log('Inserting diff container into page');
-  fileContent.prepend(diffContainer);
-  diffGenerated = true;
+  try {
+    fileContent.prepend(diffContainer);
+    console.log('Successfully inserted diff container');
+    diffGenerated = true;
+  } catch (error) {
+    console.error('Error inserting diff container:', error);
+
+    // Try appendChild as a fallback if prepend fails
+    try {
+      console.log('Trying appendChild as fallback');
+      fileContent.appendChild(diffContainer);
+      console.log('Successfully inserted diff container using appendChild');
+      diffGenerated = true;
+    } catch (appendError) {
+      console.error('Error inserting diff container using appendChild:', appendError);
+
+      // If all else fails, try to insert into the body
+      try {
+        console.log('Trying to insert into document body as last resort');
+        document.body.prepend(diffContainer);
+        console.log('Successfully inserted diff container into document body');
+        diffGenerated = true;
+      } catch (bodyError) {
+        console.error('Failed to insert diff container anywhere:', bodyError);
+      }
+    }
+  }
 }
